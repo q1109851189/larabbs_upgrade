@@ -22,10 +22,12 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 Route::resource('users', 'UsersController', ['only' => ['show', 'update', 'edit']]);
 
 // 话题相关操作
-Route::resource('topics', 'TopicsController', ['only' => ['index', 'show', 'create', 'store', 'update', 'edit', 'destroy']]);
+Route::resource('topics', 'TopicsController', ['only' => ['index', 'create', 'store', 'update', 'edit', 'destroy']]);
 
 // 话题分类
 Route::resource('categories', 'CategoriesController', ['only' => ['show']]);
 
 // 上传功能
 Route::post('upload_image', 'TopicsController@uploadImage')->name('topics.upload_image');
+
+Route::get('topics/{topic}/{slug?}', 'TopicsController@show')->name('topics.show');
