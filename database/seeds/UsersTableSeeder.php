@@ -41,7 +41,7 @@ class UsersTableSeeder extends Seeder
         $user = User::find(1);
         $user->name = 'Pest_Rose';
         $user->email = 'Pest_Rose@learnku.com';
-        $user->avatar = 'https://iocaffcdn.phphub.org/uploads/images/201710/14/1/ZqM7iaP4CR.png?imageView2/1/w/200/h/200';
+        $user->avatar = 'http://larabbs_upgrade.test/uploads/images/avatars/201903/26/1_1553593955_Baz4bxj1Cz.jpg';
         $user->save();
     }
 }
