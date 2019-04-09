@@ -6,11 +6,6 @@ use Illuminate\Http\Request;
 
 class PagesController extends Controller
 {
-    public function root()
-    {
-        return view('pages.root');
-    }
-
     public function permissionDenied()
     {
         // 如果当前用户有权限访问后台，直接跳转访问
