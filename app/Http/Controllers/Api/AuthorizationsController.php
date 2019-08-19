@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use Auth;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Requests\Api\AuthorizationRequest;
 use App\Http\Requests\Api\SocialAuthorizationRequest;
 
@@ -20,8 +19,8 @@ class AuthorizationsController extends Controller
 
         $credentials['password'] = $request->password;
 
-        if (!$token = Auth::guard('api')->attempt($credentials)) {
-            return $this->response->errorUnauthorized('用户名或密码错误');
+        if (!$token = \Auth::guard('api')->attempt($credentials)) {
+            return $this->response->errorUnauthorized(trans('auth.failed'));
         }
 
         return $this->respondWithToken($token)->setStatusCode(201);
