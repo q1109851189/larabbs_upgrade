@@ -149,6 +149,10 @@ trait HasRoles
         $this->roles()->detach($this->getStoredRole($role));
 
         $this->load('roles');
+
+        $this->forgetCachedPermissions();
+
+        return $this;
     }
 
     /**

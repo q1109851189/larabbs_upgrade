@@ -3,8 +3,9 @@
 namespace AlibabaCloud\Client\Request;
 
 use Exception;
-use Ramsey\Uuid\Uuid;
 use RuntimeException;
+use AlibabaCloud\Client\Support\Sign;
+use AlibabaCloud\Client\Support\Arrays;
 use AlibabaCloud\Client\Credentials\StsCredential;
 use AlibabaCloud\Client\Exception\ClientException;
 use AlibabaCloud\Client\Exception\ServerException;
@@ -79,7 +80,7 @@ class RpcRequest extends Request
         $this->options['query']['Format']           = $this->format;
         $this->options['query']['SignatureMethod']  = $signature->getMethod();
         $this->options['query']['SignatureVersion'] = $signature->getVersion();
-        $this->options['query']['SignatureNonce']   = Uuid::uuid1()->toString();
+        $this->options['query']['SignatureNonce']   = Sign::uuid($this->product . $this->realRegionId());
         $this->options['query']['Timestamp']        = gmdate($this->dateTimeFormat);
         $this->options['query']['Action']           = $this->action;
         if ($this->credential()->getAccessKeyId()) {
@@ -146,30 +147,11 @@ class RpcRequest extends Request
      */
     public function stringToSign()
     {
-        $query      = isset($this->options['query']) ? $this->options['query'] : [];
-        $form       = isset($this->options['form_params']) ? $this->options['form_params'] : [];
-        $parameters = \AlibabaCloud\Client\arrayMerge([$query, $form]);
-        ksort($parameters);
-        $canonicalized = '';
-        foreach ($parameters as $key => $value) {
-            $canonicalized .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
-        }
+        $query       = isset($this->options['query']) ? $this->options['query'] : [];
+        $form_params = isset($this->options['form_params']) ? $this->options['form_params'] : [];
+        $parameters  = Arrays::merge([$query, $form_params]);
 
-        return $this->method . '&%2F&' . $this->percentEncode(substr($canonicalized, 1));
-    }
-
-    /**
-     * @param string $string
-     *
-     * @return null|string|string[]
-     */
-    private function percentEncode($string)
-    {
-        $result = urlencode($string);
-        $result = str_replace(['+', '*'], ['%20', '%2A'], $result);
-        $result = preg_replace('/%7E/', '~', $result);
-
-        return $result;
+        return Sign::rpcString($this->method, $parameters);
     }
 
     /**
@@ -178,8 +160,8 @@ class RpcRequest extends Request
     private function repositionParameters()
     {
         if ($this->method === 'POST' || $this->method === 'PUT') {
-            foreach ($this->options['query'] as $apiParamKey => $apiParamValue) {
-                $this->options['form_params'][$apiParamKey] = $apiParamValue;
+            foreach ($this->options['query'] as $api_key => $api_value) {
+                $this->options['form_params'][$api_key] = $api_value;
             }
             unset($this->options['query']);
         }
@@ -196,24 +178,24 @@ class RpcRequest extends Request
     public function __call($name, $arguments)
     {
         if (strncmp($name, 'get', 3) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name);
+            $parameter_name = \mb_strcut($name, 3);
 
-            return $this->__get($parameterName);
+            return $this->__get($parameter_name);
         }
 
         if (strncmp($name, 'with', 4) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name, 4);
-            $this->__set($parameterName, $arguments[0]);
-            $this->options['query'][$parameterName] = $arguments[0];
+            $parameter_name = \mb_strcut($name, 4);
+            $this->__set($parameter_name, $arguments[0]);
+            $this->options['query'][$parameter_name] = $arguments[0];
 
             return $this;
         }
 
         if (strncmp($name, 'set', 3) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name);
-            $withMethod    = "with$parameterName";
+            $parameter_name = \mb_strcut($name, 3);
+            $with_method    = "with$parameter_name";
 
-            throw new RuntimeException("Please use $withMethod instead of $name");
+            throw new RuntimeException("Please use $with_method instead of $name");
         }
 
         throw new RuntimeException('Call to undefined method ' . __CLASS__ . '::' . $name . '()');

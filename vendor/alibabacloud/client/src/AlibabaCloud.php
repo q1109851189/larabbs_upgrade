@@ -15,7 +15,7 @@ use AlibabaCloud\Client\Exception\ClientException;
  * Class AlibabaCloud
  *
  * @package   AlibabaCloud\Client
- * @mixin     \AlibabaCloud\ServiceResolverTrait
+ * @mixin     \AlibabaCloud\IdeHelper
  */
 class AlibabaCloud
 {
@@ -30,7 +30,7 @@ class AlibabaCloud
     /**
      * Version of the Client
      */
-    const VERSION = '1.3.0';
+    const VERSION = '1.5.18';
 
     /**
      * This static method can directly call the specific service.
@@ -46,22 +46,16 @@ class AlibabaCloud
     {
         $product = \ucfirst($product);
 
-        $class = 'AlibabaCloud' . '\\' . $product . '\\' . $product;
-        if (\class_exists($class)) {
-            return new $class;
-        }
+        $product_class = 'AlibabaCloud' . '\\' . $product . '\\' . $product;
 
-        if (!\trait_exists("AlibabaCloud\\ServiceResolverTrait")) {
-            throw new ClientException(
-                'Please install alibabacloud/sdk to support product quick access.',
-                SDK::SERVICE_NOT_FOUND
-            );
+        if (\class_exists($product_class)) {
+            return new $product_class;
         }
 
         throw new ClientException(
             "May not yet support product $product quick access, "
             . 'you can use [Alibaba Cloud Client for PHP] to send any custom '
-            . 'requests: https://github.com/aliyun/openapi-sdk-php-client/blob/master/docs/3-Request-EN.md',
+            . 'requests: https://github.com/aliyun/openapi-sdk-php-client/blob/master/docs/en-US/3-Request.md',
             SDK::SERVICE_NOT_FOUND
         );
     }

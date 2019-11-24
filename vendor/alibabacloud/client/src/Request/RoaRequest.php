@@ -4,12 +4,14 @@ namespace AlibabaCloud\Client\Request;
 
 use Exception;
 use Stringy\Stringy;
-use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use AlibabaCloud\Client\SDK;
 use AlibabaCloud\Client\Encode;
 use AlibabaCloud\Client\Accept;
+use AlibabaCloud\Client\Support\Path;
+use AlibabaCloud\Client\Support\Sign;
 use AlibabaCloud\Client\Filter\Filter;
+use AlibabaCloud\Client\Support\Arrays;
 use AlibabaCloud\Client\Filter\ApiFilter;
 use AlibabaCloud\Client\Credentials\StsCredential;
 use AlibabaCloud\Client\Exception\ClientException;
@@ -27,11 +29,6 @@ use AlibabaCloud\Client\Request\Traits\DeprecatedRoaTrait;
 class RoaRequest extends Request
 {
     use DeprecatedRoaTrait;
-
-    /**
-     * @var string
-     */
-    private static $headerSeparator = "\n";
 
     /**
      * @var string
@@ -59,6 +56,7 @@ class RoaRequest extends Request
         $this->resolveQuery();
         $this->resolveHeaders();
         $this->resolveBody();
+        $this->resolveUri();
         $this->resolveSignature();
     }
 
@@ -81,7 +79,7 @@ class RoaRequest extends Request
         }
 
         // Merge data, compatible with parameters set from constructor.
-        $params = \AlibabaCloud\Client\arrayMerge(
+        $params = Arrays::merge(
             [
                 $this->data,
                 $this->options['form_params']
@@ -127,7 +125,7 @@ class RoaRequest extends Request
 
         $signature                                           = $this->httpClient()->getSignature();
         $this->options['headers']['x-acs-signature-method']  = $signature->getMethod();
-        $this->options['headers']['x-acs-signature-nonce']   = Uuid::uuid1()->toString();
+        $this->options['headers']['x-acs-signature-nonce']   = Sign::uuid($this->product . $this->realRegionId());
         $this->options['headers']['x-acs-signature-version'] = $signature->getVersion();
         if ($signature->getType()) {
             $this->options['headers']['x-acs-signature-type'] = $signature->getType();
@@ -164,7 +162,7 @@ class RoaRequest extends Request
     private function resolveContentType()
     {
         if (!isset($this->options['headers']['Content-Type'])) {
-            $this->options['headers']['Content-Type'] = "{$this->options['headers']['Accept']}; chrset=utf-8";
+            $this->options['headers']['Content-Type'] = "{$this->options['headers']['Accept']}; charset=utf-8";
         }
     }
 
@@ -221,98 +219,42 @@ class RoaRequest extends Request
     }
 
     /**
+     * @return void
+     */
+    private function resolveUri()
+    {
+        $path = Path::assign($this->pathPattern, $this->pathParameters);
+
+        $this->uri = $this->uri->withPath($path)
+                               ->withQuery(
+                                   $this->queryString()
+                               );
+    }
+
+    /**
      * @return string
      */
     public function stringToSign()
     {
-        return $this->headerStringToSign() . $this->resourceStringToSign();
+        $request = new \GuzzleHttp\Psr7\Request(
+            $this->method,
+            $this->uri,
+            $this->options['headers']
+        );
+
+        return Sign::roaString($request);
     }
 
     /**
-     * @return string
+     * @return bool|string
      */
-    private function headerStringToSign()
+    private function queryString()
     {
-        $string = $this->method . self::$headerSeparator;
-        if (isset($this->options['headers']['Accept'])) {
-            $string .= $this->options['headers']['Accept'];
-        }
-        $string .= self::$headerSeparator;
+        $query = isset($this->options['query'])
+            ? $this->options['query']
+            : [];
 
-        if (isset($this->options['headers']['Content-MD5'])) {
-            $string .= $this->options['headers']['Content-MD5'];
-        }
-        $string .= self::$headerSeparator;
-
-        if (isset($this->options['headers']['Content-Type'])) {
-            $string .= $this->options['headers']['Content-Type'];
-        }
-        $string .= self::$headerSeparator;
-
-        if (isset($this->options['headers']['Date'])) {
-            $string .= $this->options['headers']['Date'];
-        }
-        $string .= self::$headerSeparator;
-
-        $string .= $this->acsHeaderString();
-
-        return $string;
-    }
-
-    /**
-     * Construct standard Header for Alibaba Cloud.
-     *
-     * @return string
-     */
-    private function acsHeaderString()
-    {
-        $array = [];
-        foreach ($this->options['headers'] as $headerKey => $headerValue) {
-            $key = strtolower($headerKey);
-            if (strncmp($key, 'x-acs-', 6) === 0) {
-                $array[$key] = $headerValue;
-            }
-        }
-        ksort($array);
-        $string = '';
-        foreach ($array as $sortMapKey => $sortMapValue) {
-            $string .= $sortMapKey . ':' . $sortMapValue . self::$headerSeparator;
-        }
-
-        return $string;
-    }
-
-    /**
-     * @return string
-     */
-    private function resourceStringToSign()
-    {
-        $this->uri = $this->uri->withPath($this->resolvePath())
-                               ->withQuery(
-                                   Encode::create(isset($this->options['query'])
-                                                      ? $this->options['query']
-                                                      : [])
-                                         ->ksort()
-                                         ->toString()
-                               );
-
-        return $this->uri->getPath() . '?' . $this->uri->getQuery();
-    }
-
-    /**
-     * Assign path parameters to the url.
-     *
-     * @return string
-     */
-    private function resolvePath()
-    {
-        $path = $this->pathPattern;
-        foreach ($this->pathParameters as $pathKey => $value) {
-            $target = "[$pathKey]";
-            $path   = str_replace($target, $value, $path);
-        }
-
-        return $path;
+        return Encode::create($query)->ksort()->toString();
     }
 
     /**
@@ -368,24 +310,24 @@ class RoaRequest extends Request
     public function __call($name, $arguments)
     {
         if (strncmp($name, 'get', 3) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name);
+            $parameter_name = \mb_strcut($name, 3);
 
-            return $this->__get($parameterName);
+            return $this->__get($parameter_name);
         }
 
         if (strncmp($name, 'with', 4) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name, 4);
-            $this->__set($parameterName, $arguments[0]);
-            $this->pathParameters[$parameterName] = $arguments[0];
+            $parameter_name = \mb_strcut($name, 4);
+            $this->__set($parameter_name, $arguments[0]);
+            $this->pathParameters[$parameter_name] = $arguments[0];
 
             return $this;
         }
 
         if (strncmp($name, 'set', 3) === 0) {
-            $parameterName = $this->propertyNameByMethodName($name);
-            $withMethod    = "with$parameterName";
+            $parameter_name = \mb_strcut($name, 3);
+            $with_method    = "with$parameter_name";
 
-            throw new RuntimeException("Please use $withMethod instead of $name");
+            throw new RuntimeException("Please use $with_method instead of $name");
         }
 
         throw new RuntimeException('Call to undefined method ' . __CLASS__ . '::' . $name . '()');

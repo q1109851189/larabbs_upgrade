@@ -125,7 +125,7 @@ class Routes extends RouteListCommand
             $this->headers = ['Method', 'URI', 'Name', 'Version(s)'];
 
             $routes = array_map(function ($item) {
-                return array_only($item, ['method', 'uri', 'name', 'versions']);
+                return Arr::only($item, ['method', 'uri', 'name', 'versions']);
             }, $routes);
         }
 
@@ -144,7 +144,7 @@ class Routes extends RouteListCommand
      */
     protected function routeRateLimit($route)
     {
-        list($limit, $expires) = [$route->getRateLimit(), $route->getRateLimitExpiration()];
+        [$limit, $expires] = [$route->getRateLimit(), $route->getRateLimitExpiration()];
 
         if ($limit && $expires) {
             return sprintf('%s req/s', round($limit / ($expires * 60), 2));

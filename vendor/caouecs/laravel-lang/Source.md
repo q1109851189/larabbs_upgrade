@@ -162,6 +162,11 @@ Japanese (ja)
 * [Hirohisa Kawase](https://github.com/HiroKws)
 * [Yuya Takahashi](https://github.com/takahashiyuya)
 * [Jumilla](https://github.com/jumilla)
+* [Keishi Mitsuhashi](https://github.com/xenbeat)
+
+Kazakh (kk)
+
+* [Altynbek](https://github.com/altynbek07)
 
 Korean (ko)
 
@@ -183,6 +188,10 @@ Malay (ms)
 
 * [Salahuddin Hairai](https://github.com/od3n)
 * [Kamarool Karim](https://github.com/kamaroolkarim)
+
+Marathi (mr)
+
+* [Girish Vete](https://github.com/gvete)
 
 Montenegrin (me)
 
@@ -220,6 +229,7 @@ Russian (ru)
 
 * [Evgeny Kovalev](https://github.com/EvgenyKovalev)
 * [Vasily Tsybenko](https://github.com/VasayXTX)
+* [Andrey Helldar](https://github.com/andrey-helldar)
 
 Sardinian (sc)
 
@@ -297,3 +307,4 @@ Vietnamese (vi)
 
 * [anhsaker](https://github.com/anhsaker)
 * [Nguyễn Văn Ánh](https://github.com/anhskohbo)
+* [Đinh Quốc Hân](https://github.com/dinhquochan)

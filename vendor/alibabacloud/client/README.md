@@ -1,25 +1,17 @@
-English | [简体中文](./README-CN.md)
+English | [简体中文](/README-zh-CN.md)
 
 
-<p align="center">
-<a href=" https://www.alibabacloud.com"><img src="https://aliyunsdk-pages.alicdn.com/icons/AlibabaCloud.svg"></a>
-</p>
+# Alibaba Cloud Client for PHP
+[![Latest Stable Version](https://poser.pugx.org/alibabacloud/client/v/stable)](https://packagist.org/packages/alibabacloud/client)
+[![composer.lock](https://poser.pugx.org/alibabacloud/client/composerlock)](https://packagist.org/packages/alibabacloud/client)
+[![Total Downloads](https://poser.pugx.org/alibabacloud/client/downloads)](https://packagist.org/packages/alibabacloud/client)
+[![License](https://poser.pugx.org/alibabacloud/client/license)](https://packagist.org/packages/alibabacloud/client)
+[![codecov](https://codecov.io/gh/aliyun/openapi-sdk-php-client/branch/master/graph/badge.svg)](https://codecov.io/gh/aliyun/openapi-sdk-php-client)
+[![Travis Build Status](https://travis-ci.org/aliyun/openapi-sdk-php-client.svg?branch=master)](https://travis-ci.org/aliyun/openapi-sdk-php-client)
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/qb8j3lhg8349k0hk/branch/master?svg=true)](https://ci.appveyor.com/project/aliyun/openapi-sdk-php-client/branch/master)
 
-<h1 align="center">Alibaba Cloud Client for PHP</h1>
 
-<p align="center">
-<a href="https://packagist.org/packages/alibabacloud/client"><img src="https://poser.pugx.org/alibabacloud/client/v/stable" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/alibabacloud/client"><img src="https://poser.pugx.org/alibabacloud/client/v/unstable" alt="Latest Unstable Version"></a>
-<a href="https://packagist.org/packages/alibabacloud/client"><img src="https://poser.pugx.org/alibabacloud/client/composerlock" alt="composer.lock"></a>
-<a href="https://packagist.org/packages/alibabacloud/client"><img src="https://poser.pugx.org/alibabacloud/client/downloads" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/alibabacloud/client"><img src="https://poser.pugx.org/alibabacloud/client/license" alt="License"></a>
-<br/>
-<a href="https://codecov.io/gh/aliyun/openapi-sdk-php-client"><img src="https://codecov.io/gh/aliyun/openapi-sdk-php-client/branch/master/graph/badge.svg" alt="codecov"></a>
-<a href="https://scrutinizer-ci.com/g/aliyun/openapi-sdk-php-client"><img src="https://scrutinizer-ci.com/g/aliyun/openapi-sdk-php-client/badges/quality-score.png" alt="Scrutinizer Code Quality"></a>
-<a href="https://travis-ci.org/aliyun/openapi-sdk-php-client"><img src="https://travis-ci.org/aliyun/openapi-sdk-php-client.svg?branch=master" alt="Travis Build Status"></a>
-<a href="https://ci.appveyor.com/project/aliyun/openapi-sdk-php-client/branch/master"><img src="https://ci.appveyor.com/api/projects/status/699v083woth7mj85/branch/master?svg=true" alt="Appveyor Build Status"></a>
-<a href="https://scrutinizer-ci.com/code-intelligence"><img src="https://scrutinizer-ci.com/g/aliyun/openapi-sdk-php-client/badges/code-intelligence.svg" alt="Code Intelligence Status"></a>
-</p>
+![](https://aliyunsdk-pages.alicdn.com/icons/AlibabaCloud.svg)
 
 
 Alibaba Cloud Client for PHP is a client tool that helps PHP developers manage credentials and send requests, [Alibaba Cloud SDK for PHP][SDK] dependency on this tool.
@@ -30,7 +22,7 @@ Alibaba Cloud Client for PHP is a client tool that helps PHP developers manage c
 
 
 ## Prerequisites
-Your system will need to meet the [Prerequisites](docs/0-Prerequisites-EN.md), including having PHP >= 5.5. We highly recommend having it compiled with the cURL extension and cURL 7.16.2+.
+Your system will need to meet the [Prerequisites](/docs/en-US/0-Prerequisites.md), including having PHP >= 5.5. We highly recommend having it compiled with the cURL extension and cURL 7.16.2+.
 
 
 ## Installation
@@ -40,7 +32,7 @@ composer require alibabacloud/client
 ```
 > Some users may not be able to install due to network problems, you can try to switch the Composer mirror.
 
-Please see the [Installation](docs/1-Installation-EN.md) for more detailed information about installing the Alibaba Cloud Client for PHP through Composer and other means.
+Please see the [Installation](/docs/en-US/1-Installation.md) for more detailed information about installing the Alibaba Cloud Client for PHP through Composer and other means.
 
 
 ## Quick Examples
@@ -113,17 +105,17 @@ try {
 
 
 ## Documentation
-* [Prerequisites](docs/0-Prerequisites-EN.md)
-* [Installation](docs/1-Installation-EN.md)
-* [Client](docs/2-Client-EN.md)
-* [Request](docs/3-Request-EN.md)
-* [Result](docs/4-Result-EN.md)
-* [Region](docs/5-Region-EN.md)
-* [Host](docs/6-Host-EN.md)
-* [SSL Verify](docs/7-Verify-EN.md)
-* [Debug](docs/8-Debug-EN.md)
-* [Log](docs/9-Log-EN.md)
-* [Test](docs/10-Test-EN.md)
+* [Prerequisites](/docs/en-US/0-Prerequisites.md)
+* [Installation](/docs/en-US/1-Installation.md)
+* [Client](/docs/en-US/2-Client.md)
+* [Request](/docs/en-US/3-Request.md)
+* [Result](/docs/en-US/4-Result.md)
+* [Region](/docs/en-US/5-Region.md)
+* [Host](/docs/en-US/6-Host.md)
+* [SSL Verify](/docs/en-US/7-Verify.md)
+* [Debug](/docs/en-US/8-Debug.md)
+* [Log](/docs/en-US/9-Log.md)
+* [Test](/docs/en-US/10-Test.md)
 
 
 ## Issues
@@ -131,11 +123,11 @@ try {
 
 
 ## Changelog
-Detailed changes for each release are documented in the [release notes](CHANGELOG.md).
+Detailed changes for each release are documented in the [release notes](/CHANGELOG.md).
 
 
 ## Contribution
-Please make sure to read the [Contributing Guide](CONTRIBUTING.md) before making a pull request.
+Please make sure to read the [Contributing Guide](/CONTRIBUTING.md) before making a pull request.
 
 
 ## References
@@ -148,7 +140,7 @@ Please make sure to read the [Contributing Guide](CONTRIBUTING.md) before making
 
 
 ## License
-[Apache-2.0](LICENSE.md)
+[Apache-2.0](/LICENSE.md)
 
 Copyright 1999-2019 Alibaba Group Holding Ltd.
 

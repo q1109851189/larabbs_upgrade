@@ -128,9 +128,9 @@ class Router
     public function version($version, $second, $third = null)
     {
         if (func_num_args() == 2) {
-            list($version, $callback, $attributes) = array_merge(func_get_args(), [[]]);
+            [$version, $callback, $attributes] = array_merge(func_get_args(), [[]]);
         } else {
-            list($version, $attributes, $callback) = func_get_args();
+            [$version, $attributes, $callback] = func_get_args();
         }
 
         $attributes = array_merge($attributes, ['version' => $version]);
@@ -295,7 +295,7 @@ class Router
             $options = [];
 
             if (is_array($resource)) {
-                list($resource, $options) = $resource;
+                [$resource, $options] = $resource;
             }
 
             $this->resource($name, $resource, $options);
@@ -422,7 +422,7 @@ class Router
             $new['as'] = trim($old['as'].'.'.Arr::get($new, 'as', ''), '.');
         }
 
-        return array_merge_recursive(array_except($old, ['namespace', 'prefix', 'where', 'as']), $new);
+        return array_merge_recursive(Arr::except($old, ['namespace', 'prefix', 'where', 'as']), $new);
     }
 
     /**

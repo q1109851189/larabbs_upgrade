@@ -13,6 +13,8 @@ use AlibabaCloud\Client\Encode;
 use AlibabaCloud\Client\AlibabaCloud;
 use AlibabaCloud\Client\Filter\Filter;
 use AlibabaCloud\Client\Result\Result;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Promise\PromiseInterface;
 use AlibabaCloud\Client\Filter\ApiFilter;
 use AlibabaCloud\Client\Log\LogFormatter;
 use AlibabaCloud\Client\Traits\HttpTrait;
@@ -23,9 +25,9 @@ use AlibabaCloud\Client\Filter\ClientFilter;
 use AlibabaCloud\Client\Request\Traits\AcsTrait;
 use AlibabaCloud\Client\Traits\ArrayAccessTrait;
 use AlibabaCloud\Client\Traits\ObjectAccessTrait;
+use AlibabaCloud\Client\Request\Traits\RetryTrait;
 use AlibabaCloud\Client\Exception\ClientException;
 use AlibabaCloud\Client\Exception\ServerException;
-use AlibabaCloud\Client\Request\Traits\MagicTrait;
 use AlibabaCloud\Client\Request\Traits\ClientTrait;
 use AlibabaCloud\Client\Request\Traits\DeprecatedTrait;
 use AlibabaCloud\Client\Credentials\Providers\CredentialsProvider;
@@ -43,11 +45,11 @@ abstract class Request implements ArrayAccess
     use DeprecatedTrait;
     use HttpTrait;
     use RegionTrait;
-    use MagicTrait;
     use ClientTrait;
     use AcsTrait;
     use ArrayAccessTrait;
     use ObjectAccessTrait;
+    use RetryTrait;
 
     /**
      * Request Connect Timeout
@@ -109,12 +111,15 @@ abstract class Request implements ArrayAccess
         $this->options['http_errors']     = false;
         $this->options['connect_timeout'] = self::CONNECT_TIMEOUT;
         $this->options['timeout']         = self::TIMEOUT;
-        if ($options !== []) {
-            $this->options($options);
-        }
 
+        // Turn on debug mode based on environment variable.
         if (strtolower(\AlibabaCloud\Client\env('DEBUG')) === 'sdk') {
             $this->options['debug'] = true;
+        }
+
+        // Rewrite configuration if the user has a configuration.
+        if ($options !== []) {
+            $this->options($options);
         }
     }
 
@@ -328,13 +333,90 @@ abstract class Request implements ArrayAccess
     public function request()
     {
         $this->resolveOption();
-        $result = new Result($this->response(), $this);
+        $result = $this->response();
+
+        if ($this->shouldServerRetry($result)) {
+            return $this->request();
+        }
 
         if (!$result->isSuccess()) {
             throw new ServerException($result);
         }
 
         return $result;
+    }
+
+    /***
+     * @return PromiseInterface
+     * @throws Exception
+     */
+    public function requestAsync()
+    {
+        $this->resolveOption();
+
+        return self::createClient($this)->requestAsync(
+            $this->method,
+            (string)$this->uri,
+            $this->options
+        );
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return Client
+     * @throws Exception
+     */
+    public static function createClient(Request $request = null)
+    {
+        if (AlibabaCloud::hasMock()) {
+            $stack = HandlerStack::create(AlibabaCloud::getMock());
+        } else {
+            $stack = HandlerStack::create();
+        }
+
+        if (AlibabaCloud::isRememberHistory()) {
+            $stack->push(Middleware::history(AlibabaCloud::referenceHistory()));
+        }
+
+        if (AlibabaCloud::getLogger()) {
+            $stack->push(Middleware::log(
+                AlibabaCloud::getLogger(),
+                new LogFormatter(AlibabaCloud::getLogFormat())
+            ));
+        }
+
+        $stack->push(Middleware::mapResponse(static function (ResponseInterface $response) use ($request) {
+            return new Result($response, $request);
+        }));
+
+        self::$config['handler'] = $stack;
+
+        return new Client(self::$config);
+    }
+
+    /**
+     * @throws ClientException
+     * @throws Exception
+     */
+    private function response()
+    {
+        try {
+            return self::createClient($this)->request(
+                $this->method,
+                (string)$this->uri,
+                $this->options
+            );
+        } catch (GuzzleException $exception) {
+            if ($this->shouldClientRetry($exception)) {
+                return $this->response();
+            }
+            throw new ClientException(
+                $exception->getMessage(),
+                SDK::SERVER_UNREACHABLE,
+                $exception
+            );
+        }
     }
 
     /**
@@ -358,55 +440,6 @@ abstract class Request implements ArrayAccess
     {
         if (isset($this->options['form_params']) && $this->options['form_params'] === []) {
             unset($this->options['form_params']);
-        }
-    }
-
-    /**
-     * @return Client
-     * @throws Exception
-     */
-    public static function createClient()
-    {
-        if (AlibabaCloud::hasMock()) {
-            $stack = HandlerStack::create(AlibabaCloud::getMock());
-        } else {
-            $stack = HandlerStack::create();
-        }
-
-        if (AlibabaCloud::isRememberHistory()) {
-            $stack->push(Middleware::history(AlibabaCloud::referenceHistory()));
-        }
-
-        if (AlibabaCloud::getLogger()) {
-            $stack->push(Middleware::log(
-                AlibabaCloud::getLogger(),
-                new LogFormatter(AlibabaCloud::getLogFormat())
-            ));
-        }
-
-        self::$config['handler'] = $stack;
-
-        return new Client(self::$config);
-    }
-
-    /**
-     * @throws ClientException
-     * @throws Exception
-     */
-    private function response()
-    {
-        try {
-            return self::createClient()->request(
-                $this->method,
-                (string)$this->uri,
-                $this->options
-            );
-        } catch (GuzzleException $exception) {
-            throw new ClientException(
-                $exception->getMessage(),
-                SDK::SERVER_UNREACHABLE,
-                $exception
-            );
         }
     }
 }

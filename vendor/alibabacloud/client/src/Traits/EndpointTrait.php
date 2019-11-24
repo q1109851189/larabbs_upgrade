@@ -2,8 +2,10 @@
 
 namespace AlibabaCloud\Client\Traits;
 
+use InvalidArgumentException;
 use AlibabaCloud\Client\AlibabaCloud;
 use AlibabaCloud\Client\Config\Config;
+use AlibabaCloud\Client\Request\Request;
 use AlibabaCloud\Client\Filter\ApiFilter;
 use AlibabaCloud\Client\Filter\HttpFilter;
 use AlibabaCloud\Client\Filter\ClientFilter;
@@ -52,6 +54,21 @@ trait EndpointTrait
     }
 
     /**
+     * @param string $product
+     * @param string $regionId
+     *
+     * @return string
+     */
+    public static function resolveHostByStatic($product, $regionId)
+    {
+        if (isset(self::$hosts[$product][$regionId])) {
+            return self::$hosts[$product][$regionId];
+        }
+
+        return '';
+    }
+
+    /**
      * Add host based on product name and region.
      *
      * @param string $product
@@ -72,5 +89,31 @@ trait EndpointTrait
         self::$hosts[$product][$regionId] = $host;
 
         LocationService::addHost($product, $host, $regionId);
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return string
+     * @throws ClientException
+     */
+    public static function resolveHostByRule(Request $request)
+    {
+        $regionId = $request->realRegionId();
+        $network  = $request->network ?: 'public';
+        $suffix   = $request->endpointSuffix;
+        if ($network === 'public') {
+            $network = '';
+        }
+
+        if ($request->endpointRegional === 'regional') {
+            return "{$request->product}{$suffix}{$network}.{$regionId}.aliyuncs.com";
+        }
+
+        if ($request->endpointRegional === 'central') {
+            return "{$request->product}{$suffix}{$network}.aliyuncs.com";
+        }
+
+        throw new InvalidArgumentException('endpointRegional is invalid.');
     }
 }
